@@ -1,9 +1,8 @@
 " Vim syntax file
-" This is a GENERATED FILE. Please always refer to source file at the URI below.
-" Language: dmesg output
-" Maintainer: David Ne\v{c}as (Yeti) <yeti@physics.muni.cz>
-" Last Change: 2002-10-10
-" URL: http://trific.ath.cx/Ftp/vim/syntax/dmesg.vim
+" Language: /proc/kmsg output on XNU development Linux kernels
+" Maintainer: Jeremy C. Andrus <jchristian.andrus@gmail.com>
+" Last Change: 2012-03-08
+" URL: https://github.com/afrojer/vim-xnudmesg
 
 " Setup
 if version >= 600
@@ -18,6 +17,7 @@ syn case match
 
 " Parse the line
 syn match dmesgFuncName "\]\s*[a-zA-Z_]\+:\s\s"ms=s+1,me=e-2 contained
+syn match dmesgIPCFunc "\]\s*_X[a-zA-Z_]\+:\s\s"ms=s+1,me=e-2 contained
 syn match dmesgAssign "[^\]]\s*\w\+[:=][^\s]"ms=s+1,me=e-2 contained
 syn match dmesgSpecialChar "\\\d\d\d\|\\." contained
 syn region dmesgString start=+"+ skip=+\\\\\|\\"+ end=+"+ contains=dmesgSpecialChar oneline contained
@@ -28,18 +28,18 @@ syn match dmesgNumberRHS "\W\(0x\x\+\|-\=\d\+\)"lc=1 contained
 "syn match dmesgOtherRHS "?" contained
 syn match dmesgConstant "[A-Z_]\{2,}" contained
 syn match dmesgOperator "[-+=*/!%&|:,]" contained
-syn region dmesgVerbosed start="(" end=")" matchgroup=Normal contained oneline
+syn region dmesgVerbosed start="(" end=")" matchgroup=Normal oneline
 
 syn match dmesgMachTrapStart "-----\strap\s\d\+\sSTART\s-----" contained
 syn match dmesgMachTrapEnd "-----\strap\s\d\+\sEND\s-----" contained
 syn match dmesgThinkDifferent "THINK\sDIFFERENT" contained
 syn match dmesgThinkDifferent "think\sdifferent" contained
-syn region dmesgXNUFunc start="\]\s*[a-zA-Z_]\+:\s\s" end="$" contains=dmesgMachTrapStart,dmesgMachTrapEnd,dmesgOperator,dmesgNumberRHS,dmesgSpecialChar,dmesgConstant,dmesgAssign,dmesgFuncName,dmesgVerbosed,dmesgThinkDifferent oneline transparent
+syn region dmesgXNUFunc start="\]\s*[a-zA-Z_]\+:\s\s" end="$" contains=dmesgMachTrapStart,dmesgMachTrapEnd,dmesgOperator,dmesgNumberRHS,dmesgSpecialChar,dmesgConstant,dmesgAssign,dmesgFuncName,dmesgIPCFunc,dmesgVerbosed,dmesgThinkDifferent oneline transparent
 
 syn match dmesgPID "\]\s*\[\s*\d\+\]"ms=s+3,me=e-1
 syn match dmesgNIsys "!! IOS[_]ni[_]syscall:"
-syn match dmesgPortFrom "from\s0x\d\+"
-syn match dmesgPortTo "to\s0x\d\+"
+syn match dmesgPortFrom "from\s0x\x\+"
+syn match dmesgPortTo "to\s0x\x\+"
 syn region dmesgComment start="/\*" end="\*/" oneline
 syn match dmesgTS "\[\s*\d\+\.\d\+\s*\]"ms=s+1,me=e-1 contained
 syn region dmesgLvlDebug start="^<7>" end="\]"me=e-1 contains=dmesgTS oneline
@@ -72,8 +72,9 @@ if version >= 508 || !exists("did_dmesg_syntax_inits")
 	HiLink dmesgConstant Function
 	HiLink dmesgAssign Macro
 	HiLink dmesgFuncName Statement
+	HiLink dmesgIPCFunc Structure
 	HiLink dmesgOperator Operator
-	HiLink dmesgThinkDifferent Structure
+	HiLink dmesgThinkDifferent Error
 	HiLink dmesgSpecialChar Special
 	HiLink dmesgPID PreProc
 	HiLink dmesgTS Comment
