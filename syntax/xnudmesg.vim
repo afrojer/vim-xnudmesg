@@ -16,25 +16,23 @@ endif
 syn case match
 
 " Parse the line
+syn region dmesgVerbosed start="(" end=")" matchgroup=Normal contained oneline
 syn match dmesgFuncName "\]\s*[a-zA-Z_]\+:\s\s"ms=s+1,me=e-2 contained
 syn match dmesgIPCFunc "\]\s*_X[a-zA-Z_]\+:\s\s"ms=s+1,me=e-2 contained
 syn match dmesgAssign "[^\]]\s*\w\+[:=][^\s]"ms=s+1,me=e-2 contained
 syn match dmesgSpecialChar "\\\d\d\d\|\\." contained
 syn region dmesgString start=+"+ skip=+\\\\\|\\"+ end=+"+ contains=dmesgSpecialChar oneline contained
 syn match dmesgNumber "\W[+-]\=\(\d\+\)\=\.\=\d\+\([eE][+-]\=\d\+\)\="lc=1 contained
-syn match dmesgNumber "\W0x\x\+" contained
-syn match dmesgNumber "\W0x\s*(null)" contained
-syn match dmesgNumberRHS "\W\(0x\x\+\|-\=\d\+\)"lc=1 contained
-"syn match dmesgOtherRHS "?" contained
+syn match dmesgNumber "\W0x\x\+"lc=1 contained
+syn match dmesgNumber "\W0x\s*(null)"lc=1 contained
 syn match dmesgConstant "[A-Z_]\{2,}" contained
 syn match dmesgOperator "[-+=*/!%&|:,]" contained
-syn region dmesgVerbosed start="(" end=")" matchgroup=Normal oneline
 
 syn match dmesgMachTrapStart "-----\strap\s\d\+\sSTART\s-----" contained
 syn match dmesgMachTrapEnd "-----\strap\s\d\+\sEND\s-----" contained
 syn match dmesgThinkDifferent "THINK\sDIFFERENT" contained
 syn match dmesgThinkDifferent "think\sdifferent" contained
-syn region dmesgXNUFunc start="\]\s*[a-zA-Z_]\+:\s\s" end="$" contains=dmesgMachTrapStart,dmesgMachTrapEnd,dmesgOperator,dmesgNumberRHS,dmesgSpecialChar,dmesgConstant,dmesgAssign,dmesgFuncName,dmesgIPCFunc,dmesgVerbosed,dmesgThinkDifferent oneline transparent
+syn region dmesgXNUFunc start="\]\s*[a-zA-Z_]\+:\s\s" end="$" contains=dmesgMachTrapStart,dmesgMachTrapEnd,dmesgOperator,dmesgSpecialChar,dmesgConstant,dmesgAssign,dmesgNumber,dmesgFuncName,dmesgIPCFunc,dmesgVerbosed,dmesgThinkDifferent oneline transparent
 
 syn match dmesgPID "\]\s*\[\s*\d\+\]"ms=s+3,me=e-1
 syn match dmesgNIsys "!! IOS[_]ni[_]syscall:"
@@ -67,14 +65,12 @@ if version >= 508 || !exists("did_dmesg_syntax_inits")
 	HiLink dmesgComment Comment
 	HiLink dmesgVerbosed Comment
 	HiLink dmesgNumber Number
-	HiLink dmesgNumberRHS Number
 	HiLink dmesgString String
 	HiLink dmesgConstant Function
 	HiLink dmesgAssign Macro
 	HiLink dmesgFuncName Statement
 	HiLink dmesgIPCFunc Structure
 	HiLink dmesgOperator Operator
-	HiLink dmesgThinkDifferent Error
 	HiLink dmesgSpecialChar Special
 	HiLink dmesgPID PreProc
 	HiLink dmesgTS Comment
@@ -83,11 +79,16 @@ if version >= 508 || !exists("did_dmesg_syntax_inits")
 	HiLink dmesgLvlWarn Include
 	HiLink dmesgLvlErr Error
 	HiLink dmesgXNUFunc Normal
-	SynColor dmesgMachTrapStart guibg=#222222 guifg=#666600 gui=italic
-	SynColor dmesgMachTrapEnd guibg=#222222 guifg=#660066 gui=italic
+	SynColor dmesgThinkDifferent guibg=#ffff00 guifg=#9a9a50
+	SynColor dmesgMachTrapStart guibg=#2a312a guifg=#2a8a2a gui=italic
+	SynColor dmesgMachTrapEnd guibg=#312a2a guifg=#8a2a2a gui=italic
 	SynColor dmesgPortFrom guibg=#000044 guifg=#5555ff gui=bold
 	SynColor dmesgPortTo guibg=#004400 guifg=#00aa00 gui=bold
 	SynColor dmesgNIsys guibg=firebrick3 guifg=Black gui=bold,italic
+
+	if !exists(':PidLog')
+		:command -nargs=1 PidLog :v/\[\s*<args>\]/d
+	endif
 
 	delcommand HiLink
 	delcommand SynColor
