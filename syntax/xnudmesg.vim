@@ -16,28 +16,36 @@ endif
 syn case match
 
 " Parse the line
-
-syn region dmesgVerbosed start="(" end=")" matchgroup=Normal contained oneline
-syn match dmesgFuncName "\]\s*[a-zA-Z_]\+:\s\s"ms=s+1,me=e-2 contained
-syn match dmesgIPCFunc "\]\s*_X[a-zA-Z_]\+:\s\s"ms=s+1,me=e-2 contained
-syn match dmesgAssign "[^\]]\s*\w\+[:=][^\s]"ms=s+1,me=e-2 contained
+syn match dmesgFuncName "\]\s*[a-zA-Z_][a-zA-Z0-9_\-]\+:\s\s"ms=s+1,me=e-2 contained
+syn match dmesgLogFuncName "\]\s*/\+[a-zA-Z_][a-zA-Z0-9_+/\-]\+:\s\s"ms=s+1,me=e-2 contained
+syn match dmesgIPCFunc "\]\s*_X[a-zA-Z_][a-zA-Z0-9_]\+:\s\s"ms=s+1,me=e-2 contained
+syn match dmesgAssign "[^\]\s]\s*\w\+[:=]\+[^\s]"ms=s+1,me=e-2 contained
 syn match dmesgSpecialChar "\\\d\d\d\|\\." contained
 syn region dmesgString start=+"+ skip=+\\\\\|\\"+ end=+"+ contains=dmesgSpecialChar oneline contained
+syn region dmesgString start=+<string>+ end=+</string>+ matchgroup=dmesgString contains=dmesgSpecialChar oneline contained
 syn match dmesgNumber "\W[+-]\=\(\d\+\)\=\.\=\d\+\([eE][+-]\=\d\+\)\="lc=1 contained
 syn match dmesgNumber "\W0x\x\+"lc=1 contained
 syn match dmesgNumber "\W0x\s*(null)"lc=1 contained
-syn match dmesgConstant "[A-Z_]\{2,}" contained
-syn match dmesgOperator "[-+=*/!%&|:,><]" contained
+syn match dmesgConstant "\W[A-Z_]\{2,}\W"ms=s+1,me=e-1 contained
+syn match dmesgOperator "[-+=*/!%&|:,]" contained
+"syn region dmesgVerbosed start="(" end=")" matchgroup=Normal contained oneline contains=dmesgVerboseNest
+"syn region dmesgVerboseNest start="(" end=")" contained transparent
+syn match dmesgClassName "\(_*IO\|OS\|PM\|Linux\)[a-zA-Z0-9]\+" contained
+syn match dmesgPortFrom "from\s0x[0-9a-fA-F]\+" contained
+syn match dmesgPortFrom "from\s0x\s*(null)" contained
+syn match dmesgPortTo "to\s0x[0-9a-fA-F]\+" contained
+syn match dmesgPortTo "to\s0x\s*(null)" contained
+syn match dmesgPortTo "port name: 0x[0-9a-fA-F]\+" contained
 syn match dmesgMachTrapStart "-----\strap\s\d\+\sSTART\s-----" contained
 syn match dmesgMachTrapEnd "-----\strap\s\d\+\sEND\s-----" contained
 syn match dmesgThinkDifferent "THINK\sDIFFERENT" contained
 syn match dmesgThinkDifferent "think\sdifferent" contained
+
+syn region dmesgXNUFunc start="\]\s*/*[a-zA-Z_][a-zA-Z0-9_+/\-]\+:\s\s" end="$" contains=dmesgMachTrapStart,dmesgMachTrapEnd,dmesgOperator,dmesgNumber,dmesgSpecialChar,dmesgString,dmesgConstant,dmesgAssign,dmesgFuncName,dmesgIPCFunc,dmesgLogFuncName,dmesgVerbosed,dmesgThinkDifferent,dmesgClassName,dmesgPortFrom,dmesgPortTo oneline transparent
+
 syn match dmesgPID "\]\s*\[\s*\d\+\]"ms=s+3,me=e-1
 syn match dmesgNIsys "!! IOS[_]ni[_]syscall:"
-syn match dmesgPortFrom "from\s0x\x\+" contained
-syn match dmesgPortTo "to\s0x\x\+" contained
-syn region dmesgXNUFunc start="\]\s*[a-zA-Z_]\+:\s\s" end="$" contains=dmesgPortFrom,dmesgPortTo,dmesgMachTrapStart,dmesgMachTrapEnd,dmesgOperator,dmesgSpecialChar,dmesgConstant,dmesgAssign,dmesgNumber,dmesgFuncName,dmesgIPCFunc,dmesgVerbosed,dmesgThinkDifferent oneline transparent
-
+syn region dmesgComment start="/\*" end="\*/" oneline
 syn match dmesgTS "\[\s*\d\+\.\d\+\s*\]"ms=s+1,me=e-1 contained
 syn region dmesgLvlDebug start="^<7>" end="\]"me=e-1 contains=dmesgTS oneline
 syn region dmesgLvlInfo start="^<6>" end="\]"me=e-1 contains=dmesgTS oneline
@@ -67,8 +75,10 @@ if version >= 508 || !exists("did_dmesg_syntax_inits")
 	HiLink dmesgConstant Function
 	HiLink dmesgAssign Macro
 	HiLink dmesgFuncName Statement
-	HiLink dmesgIPCFunc Structure
+	HiLink dmesgIPCFunc Special
 	HiLink dmesgOperator Operator
+	HiLink dmesgLogFuncName Macro
+	HiLink dmesgClassName Structure
 	HiLink dmesgSpecialChar Special
 	HiLink dmesgPID PreProc
 	HiLink dmesgTS Comment
